@@ -15,10 +15,10 @@ function App() {
     <>
       <Mapbox zoom={15} center={[-87.494044, 36.860856]}>
         {/* <SnapMergeSplit /> */}
-        <Image />
+        {/* <Image /> */}
         {/* <Tiff /> */}
         {/* <ChangeCoords /> */}
-        {/* <EditingFeatures /> */}
+        <EditingFeatures />
       </Mapbox>
     </>
   );
