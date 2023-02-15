@@ -4,6 +4,7 @@ import { Mapbox } from "./Map/Mapbox";
 import "bootstrap/dist/js/bootstrap.min.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 import SnapMergeSplit from "./Sprint21/SnapMergeSplit";
+import Toggle from "./Sprint20/Toggle";
 import Image from "./Sprint20/Image";
 import Tiff from "./Sprint20/Tiff";
 import ChangeCoords from "./Sprint21/ChangeCoords";
@@ -13,12 +14,13 @@ function App() {
   const [hide, setHide] = useState(false);
   return (
     <>
-      <Mapbox zoom={15} center={[-87.494044, 36.860856]}>
-        {/* <SnapMergeSplit /> */}
+      <Mapbox zoom={11} center={[51.41742415918904, 35.73019558439101]}>
+        <SnapMergeSplit />
+        {/* <Toggle /> */}
         {/* <Image /> */}
         {/* <Tiff /> */}
         {/* <ChangeCoords /> */}
-        <EditingFeatures />
+        {/* <EditingFeatures /> */}
       </Mapbox>
     </>
   );

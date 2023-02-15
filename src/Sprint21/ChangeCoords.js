@@ -5,36 +5,34 @@ import * as turf from "@turf/turf";
 const ChangeCoords = () => {
   const { map } = useContext(MapContextMapbox);
   const [coords, setCoords] = useState([-87.4908146203468, 36.85979156629527]);
-  console.log(coords);
+  const [lineLastCoords, setLineLastCoords] = useState([
+    [-87.5008146203468, 36.85979156629527],
+  ]);
+  const [poly, setPoly] = useState({});
 
   useEffect(() => {
     if (!map) return;
 
+    setPoly(turf.buffer(turf.point(coords), 1));
+
+    console.log(turf.buffer(turf.point(coords), 1));
+
     map.on("load", () => {
-      map.on("mousemove", (e) => {
-        // console.log(e);
+      map.addSource("polygon", {
+        type: "geojson",
+        data: turf.buffer(turf.point(coords), 1),
+      });
+      map.addLayer({
+        id: "polygon",
+        type: "fill",
+        source: "polygon",
+        paint: { "fill-color": "yellow", "fill-opacity": 0.5 },
       });
 
+      // Point
       map.addSource("point", {
         type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          name: "test3",
-          crs: {
-            type: "name",
-            properties: { name: "urn:ogc:def:crs:OGC:1.3:CRS84" },
-          },
-          features: [
-            {
-              type: "Feature",
-              properties: {},
-              geometry: {
-                type: "Point",
-                coordinates: coords,
-              },
-            },
-          ],
-        },
+        data: turf.point(coords),
       });
       map.addLayer({
         id: "point",
@@ -42,32 +40,88 @@ const ChangeCoords = () => {
         source: "point",
         paint: { "circle-color": "red", "circle-radius": 10 },
       });
+
+      // Line
+      map.addSource("line", {
+        type: "geojson",
+        data: turf.lineString([
+          [-87.4908146203468, 36.85879156629527],
+          [-87.4908146203468, 36.86879156629527],
+          [-87.5008146203468, 36.85979156629527],
+        ]),
+      });
+      map.addLayer({
+        id: "line",
+        type: "line",
+        source: "line",
+        paint: { "line-color": "blue", "line-width": 4 },
+      });
     });
   }, [map]);
   return (
     <div className="ml-3" style={{ zIndex: "1", position: "relative" }}>
-      <input
-        type="text"
-        value={coords}
-        size={35}
-        onChange={(e) =>
-          setCoords([
-            parseFloat(e.target.value.split(",")[0]),
-            parseFloat(e.target.value.split(",")[1]),
-          ])
-        }
-      />
-      <button
-        className="btn btn-primary"
-        onClick={() => {
-          if (map) {
-            map.getSource("point").setData(turf.point(coords));
+      <div>
+        <label style={{ background: "white" }}>Point: </label>
+        <input
+          type="text"
+          value={coords}
+          size={35}
+          onChange={(e) =>
+            setCoords([
+              parseFloat(e.target.value.split(",")[0]),
+              parseFloat(e.target.value.split(",")[1]),
+            ])
           }
-        }}
-      >
-        Update
-      </button>
-      ;
+        />
+        <button
+          className="btn btn-primary"
+          onClick={() => {
+            if (map) {
+              let pt = turf.point(coords);
+              console.log(poly);
+              let isCoordsInsideJobs = turf.booleanPointInPolygon(pt, poly);
+              if (!isCoordsInsideJobs)
+                alert("Entered coordinates are outside polygon");
+              map.getSource("point").setData(turf.point(coords));
+            }
+          }}
+        >
+          Update
+        </button>
+      </div>
+
+      <div>
+        <label style={{ background: "white" }}>Line: </label>
+        <input
+          type="text"
+          value={lineLastCoords}
+          size={35}
+          onChange={(e) => {
+            let lastCoords = [
+              e.target.value.split(",")[0],
+              e.target.value.split(",")[1],
+            ];
+            setLineLastCoords(lastCoords);
+          }}
+        />
+        <button
+          className="btn btn-primary"
+          onClick={() => {
+            if (map) {
+              let lineCoords =
+                map.getSource("line")._data?.geometry.coordinates;
+
+              lineCoords.pop();
+              lineCoords.push(lineLastCoords);
+              console.log(lineCoords);
+
+              map.getSource("line").setData(turf.lineString(lineCoords));
+            }
+          }}
+        >
+          Update
+        </button>
+      </div>
     </div>
   );
 };
